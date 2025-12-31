@@ -12,13 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.example.trains.ui.theme.TrainsTheme
 import kotlinx.coroutines.delay
@@ -29,7 +31,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TrainsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ -> Game() }
+                Scaffold(modifier = Modifier.fillMaxSize()) { padding -> Game(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) }
             }
         }
     }
@@ -41,47 +47,32 @@ fun Game(modifier: Modifier = Modifier) {
 
     val scale = remember {Animatable(0f)}
 
+    var tapLocation by remember {mutableStateOf<Offset>(Offset(0f,0f))}
+
     LaunchedEffect(Unit) {
-        delay(500)
+        delay(2000)
         scale.animateTo(
             targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = 0.5f,
-                stiffness = 1200f
             )
-        )
     }
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val r = 20.dp.toPx() * scale.value
-        val w = 6.dp.toPx() * scale.value
-        drawOutlinedCircle(
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    tapLocation = offset
+                }
+            }
+    ) {
+        drawLineSegment(
             center,
-            r,
-            Color(0xffb1b1b1),
-            Color(0xff646464),
-            w
+            tapLocation,
+            Color(0xffff5d52),
+            7.dp.toPx()
+
         )
     }
 }
 
-fun DrawScope.drawOutlinedCircle(
-    center: Offset,
-    radius: Float,
-    fillColor: Color,
-    strokeColor: Color,
-    strokeWidth: Float
-) {
-    drawCircle(
-        color = fillColor,
-        radius = radius,
-        center = center
-    )
 
-    drawCircle(
-        color = strokeColor,
-        radius = radius,
-        center = center,
-        style = Stroke(width = strokeWidth)
-    )
-}

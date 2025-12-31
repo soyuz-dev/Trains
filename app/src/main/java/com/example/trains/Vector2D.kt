@@ -1,0 +1,133 @@
+package com.example.trains
+
+import androidx.compose.ui.geometry.Offset
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
+data class Vector2D(val x: Double, val y: Double) {
+
+    companion object {
+        // Common constants
+        val ZERO = Vector2D(0.0, 0.0)
+        val UNIT_X = Vector2D(1.0, 0.0)
+        val UNIT_Y = Vector2D(0.0, 1.0)
+
+        const val EPSILON = 1e-10
+    }
+
+    // Basic arithmetic
+    operator fun plus(other: Vector2D): Vector2D =
+        Vector2D(x + other.x, y + other.y)
+
+    operator fun minus(other: Vector2D): Vector2D =
+        Vector2D(x - other.x, y - other.y)
+
+    operator fun unaryMinus(): Vector2D =
+        Vector2D(-x, -y)
+
+    operator fun times(scalar: Double): Vector2D =
+        Vector2D(x * scalar, y * scalar)
+
+    operator fun div(scalar: Double): Vector2D =
+        if (scalar != 0.0) {
+            Vector2D(x / scalar, y / scalar)
+        } else {
+            println("Division by zero detected. Did you intend scalar to be zero?")
+            ZERO
+        }
+
+    // Length & normalization
+    fun length(): Double =
+        sqrt(x * x + y * y)
+
+    fun lengthSquared(): Double =
+        x * x + y * y
+
+    fun normalize(): Vector2D {
+        val len = length()
+        if (len < EPSILON) return ZERO
+        val invLen = 1.0 / len
+        return Vector2D(x * invLen, y * invLen)
+    }
+
+    // Dot & cross products
+    fun dot(other: Vector2D): Double =
+        x * other.x + y * other.y
+
+    /**
+     * 2D "cross" product — returns scalar z-component magnitude
+     * of the 3D cross product.
+     */
+    fun cross(other: Vector2D): Double =
+        x * other.y - y * other.x
+
+    /**
+     * Returns a vector perpendicular to this one (rotated 90° CCW).
+     */
+    fun perpendicular(): Vector2D =
+        Vector2D(-y, x)
+
+    // Distance
+    fun distance(to: Vector2D): Double =
+        (this - to).length()
+
+    // Projection and reflection
+    fun project(onto: Vector2D): Vector2D {
+        val norm = onto.normalize()
+        return norm * (dot(norm))
+    }
+
+    fun reflect(normal: Vector2D): Vector2D {
+        // v' = v - 2*(v·n)*n
+        val d = dot(normal)
+        return this - (normal * (2.0 * d))
+    }
+
+    // Rotation
+    fun rotate(radians: Double): Vector2D {
+        val c = cos(radians)
+        val s = sin(radians)
+        return Vector2D(
+            x * c - y * s,
+            x * s + y * c
+        )
+    }
+
+    fun isZero(): Boolean =
+        abs(x) < EPSILON && abs(y) < EPSILON
+
+    // Epsilon-based equality (IMPORTANT: overrides data-class default)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Vector2D) return false
+
+        return abs(x - other.x) < EPSILON &&
+                abs(y - other.y) < EPSILON
+    }
+
+    override fun hashCode(): Int {
+        val xBits = java.lang.Double.doubleToLongBits(
+            if (abs(x) < EPSILON) 0.0 else x
+        )
+        val yBits = java.lang.Double.doubleToLongBits(
+            if (abs(y) < EPSILON) 0.0 else y
+        )
+
+        return (xBits xor (xBits ushr 32) xor
+                yBits xor (yBits ushr 32)).toInt()
+    }
+
+    override fun toString(): String =
+        "Vector2D[$x, $y]"
+}
+
+operator fun Double.times(v: Vector2D): Vector2D =
+    Vector2D(this * v.x, this * v.y)
+
+fun Vector2D.toOffset(): Offset =
+    Offset(x.toFloat(), y.toFloat())
+
+fun Offset.toVector2D() : Vector2D =
+    Vector2D(x.toDouble(), y.toDouble())
