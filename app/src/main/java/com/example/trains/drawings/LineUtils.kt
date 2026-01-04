@@ -36,14 +36,14 @@ fun intersectRays(
 }
 
 
-fun computePath(A: Vector2D, B: Vector2D): List<Vector2D> {
+fun computePath(A: Vector2D, B: Vector2D): Pair<List<Vector2D>, Double> {
     val d = B - A
     val angle = atan2(d.y, d.x)
 
     // Straight-line snap
     val snapped = round(angle / (Math.PI / 4)) * (Math.PI / 4)
     if (abs(angle - snapped) < 1e-6) {
-        return listOf(A, B)
+        return Pair(listOf(A, B), snapped)
     }
 
     val (a1, a2) = snapDirections(angle)
@@ -57,9 +57,9 @@ fun computePath(A: Vector2D, B: Vector2D): List<Vector2D> {
     val v = Vector2D(cos(thetaB), sin(thetaB))
 
     val C: Vector2D = intersectRays(A, u, B, v)
-        ?: return listOf(A, B)
+        ?: return Pair(listOf(A, B), thetaB - Math.PI)
 
-    return listOf(A, C, B)
+    return Pair(listOf(A, C, B), thetaB - Math.PI)
 }
 
 
@@ -72,14 +72,15 @@ fun DrawScope.drawLineSegment(
     strokeWidth: Float = 7.dp.toPx(),
     cornerRadius: Float = 10.dp.toPx()
 
-) {
+): Double {
 
-    val points = computePath(
+    val p = computePath(
         start.toVector2D(),
         end.toVector2D()
     )
+    val points = p.first
 
-    if (points.isEmpty()) return
+    if (points.isEmpty()) return p.second
 
     if(points.size == 2) {
         drawLine(
@@ -88,7 +89,7 @@ fun DrawScope.drawLineSegment(
             end,
             strokeWidth
         )
-        return
+        return p.second
     }
 
     val A = points[0].toOffset()
@@ -121,18 +122,19 @@ fun DrawScope.drawLineSegment(
         color = color,
         style = Stroke(width = strokeWidth)
     )
+    return p.second
 }
 
 
 fun DrawScope.drawTHandle(
     end: Offset,
     color: Color,
-    direction: Int,        // multiple of 45
+    direction: Double,        // multiple of 45
     strokeWidth: Float = 7.dp.toPx(),
     length: Float = 20.dp.toPx(),
     tLength: Float = 12.dp.toPx()
 ) {
-    val theta = direction * DEG45 // convert direction to radians
+    val theta = direction // convert direction to radians
 
     // Unit vector in main direction
     val dir = Offset(cos(theta).toFloat(), sin(theta).toFloat())
@@ -168,7 +170,7 @@ fun DrawScope.drawLineEnd(
     strokeWidth: Float = 7.dp.toPx(),
     cornerRadius: Float = 10.dp.toPx()
 ) {
-    drawLineSegment(
+    val dir = drawLineSegment(
         start,
         end,
         color,
@@ -179,7 +181,7 @@ fun DrawScope.drawLineEnd(
     drawTHandle(
         end,
         color,
-        0,
+        dir,
         strokeWidth
     )
 
