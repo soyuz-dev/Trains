@@ -1,4 +1,4 @@
-package com.example.trains
+package com.example.trains.drawings
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -6,6 +6,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import com.example.trains.Vector2D
+import com.example.trains.toOffset
+import com.example.trains.toVector2D
 import kotlin.math.*
 
 private const val DEG45 = Math.PI / 4.0
@@ -24,7 +27,7 @@ fun intersectRays(
     val w = B - A
     val det = u.cross(v)
 
-    if (abs(det) < Vector2D.EPSILON) {
+    if (abs(det) < Vector2D.Companion.EPSILON) {
         return null // parallel or nearly parallel
     }
 
@@ -66,7 +69,7 @@ fun DrawScope.drawLineSegment(
     start: Offset,
     end: Offset,
     color: Color,
-    strokeWidth: Float,
+    strokeWidth: Float = 7.dp.toPx(),
     cornerRadius: Float = 10.dp.toPx()
 
 ) {
@@ -121,3 +124,63 @@ fun DrawScope.drawLineSegment(
 }
 
 
+fun DrawScope.drawTHandle(
+    end: Offset,
+    color: Color,
+    direction: Int,        // multiple of 45
+    strokeWidth: Float = 7.dp.toPx(),
+    length: Float = 20.dp.toPx(),
+    tLength: Float = 12.dp.toPx()
+) {
+    val theta = direction * DEG45 // convert direction to radians
+
+    // Unit vector in main direction
+    val dir = Offset(cos(theta).toFloat(), sin(theta).toFloat())
+
+    // Perpendicular vector for the T cross
+    val perp = Offset(-dir.y, dir.x)
+
+    // Compute the three points of the T
+    val base = end - dir * length        // line along the handle
+    val left = end + perp * tLength      // first side of cross
+    val right = end - perp * tLength     // other side of cross
+
+    val path = Path().apply {
+        moveTo(base.x, base.y)           // start of handle
+        lineTo(end.x, end.y)             // main line
+        lineTo(left.x, left.y)           // first cross line
+        moveTo(end.x, end.y)
+        lineTo(right.x, right.y)         // second cross line
+    }
+
+    drawPath(
+        path = path,
+        color = color,
+        style = Stroke(width = strokeWidth)
+    )
+}
+
+
+fun DrawScope.drawLineEnd(
+    start: Offset,
+    end: Offset,
+    color: Color,
+    strokeWidth: Float = 7.dp.toPx(),
+    cornerRadius: Float = 10.dp.toPx()
+) {
+    drawLineSegment(
+        start,
+        end,
+        color,
+        strokeWidth,
+        cornerRadius
+    )
+
+    drawTHandle(
+        end,
+        color,
+        0,
+        strokeWidth
+    )
+
+}

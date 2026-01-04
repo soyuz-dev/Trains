@@ -22,6 +22,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.example.trains.drawings.drawLineEnd
+import com.example.trains.drawings.drawLineSegment
+import com.example.trains.drawings.drawTHandle
 import com.example.trains.ui.theme.TrainsTheme
 import kotlinx.coroutines.delay
 
@@ -65,12 +68,11 @@ fun Game(modifier: Modifier = Modifier) {
                 }
             }
     ) {
-        drawLineSegment(
+        drawLineEnd(
             center,
             tapLocation,
             Color(0xffff5d52),
             7.dp.toPx()
-
         )
     }
 }

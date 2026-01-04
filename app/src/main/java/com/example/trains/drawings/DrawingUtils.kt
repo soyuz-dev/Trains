@@ -1,12 +1,12 @@
-package com.example.trains
+package com.example.trains.drawings
 
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sqrt
 
 fun DrawScope.drawOutlinedCircle(
@@ -51,13 +51,13 @@ fun DrawScope.drawOutlinedSquare(
     drawRect(
         color = fillColor,
         topLeft = topLeft,
-        size = androidx.compose.ui.geometry.Size(twice, twice)
+        size = Size(twice, twice)
     )
 
     drawRect(
         color = strokeColor,
         topLeft = topLeft,
-        size = androidx.compose.ui.geometry.Size(twice, twice),
+        size = Size(twice, twice),
         style = Stroke(width = strokeWidth)
     )
 }
