@@ -2,9 +2,10 @@ package com.example.trains.vm
 
 sealed interface LinePart {
     val id: Int
+
 }
 
-data class LineSegment(
+data class LineSeg(
     override val id : Int,
     val start: Station,
     val end: Station,

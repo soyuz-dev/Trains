@@ -42,7 +42,7 @@ fun computePath(A: Vector2D, B: Vector2D): Pair<List<Vector2D>, Double> {
 
     // Straight-line snap
     val snapped = round(angle / (Math.PI / 4)) * (Math.PI / 4)
-    if (abs(angle - snapped) < 1e-6) {
+    if (abs(angle - snapped) < 3e-2) {
         return Pair(listOf(A, B), snapped)
     }
 
@@ -131,7 +131,6 @@ fun DrawScope.drawTHandle(
     color: Color,
     direction: Double,        // multiple of 45
     strokeWidth: Float = 7.dp.toPx(),
-    length: Float = 20.dp.toPx(),
     tLength: Float = 12.dp.toPx()
 ) {
     val theta = direction // convert direction to radians
@@ -143,13 +142,11 @@ fun DrawScope.drawTHandle(
     val perp = Offset(-dir.y, dir.x)
 
     // Compute the three points of the T
-    val base = end - dir * length        // line along the handle
     val left = end + perp * tLength      // first side of cross
     val right = end - perp * tLength     // other side of cross
 
     val path = Path().apply {
-        moveTo(base.x, base.y)           // start of handle
-        lineTo(end.x, end.y)             // main line
+        moveTo(end.x, end.y)             // main line
         lineTo(left.x, left.y)           // first cross line
         moveTo(end.x, end.y)
         lineTo(right.x, right.y)         // second cross line
@@ -184,5 +181,4 @@ fun DrawScope.drawLineEnd(
         dir,
         strokeWidth
     )
-
 }
